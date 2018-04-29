@@ -1,6 +1,7 @@
 package nycgeoclient
 
 import (
+	"net/url"
 	"testing"
 )
 
@@ -87,5 +88,20 @@ func TestNewRequest_withAbsoluteURL(t *testing.T) {
 	// test that absolute URL is handled as a relative one
 	if got, want := req.URL.String(), outURL; got != want {
 		t.Errorf("NewRequest(%q) URL is %v, want %v", inURL, got, want)
+	}
+}
+
+func TestNewRequest_badURL(t *testing.T) {
+	c, _ := NewClient(Config{})
+	_, err := c.NewRequest("GET", ":")
+	testURLParseError(t, err)
+}
+
+func testURLParseError(t *testing.T, err error) {
+	if err == nil {
+		t.Errorf("Expected error to be returned")
+	}
+	if err, ok := err.(*url.Error); !ok || err.Op != "parse" {
+		t.Errorf("Expected URL parse error, got %+v", err)
 	}
 }
